@@ -51,3 +51,49 @@ BEGIN
     WHERE id = p_id;
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION actualizar_stock(
+    p_producto_id INTEGER,
+    p_cantidad INTEGER
+) RETURNS VOID AS $$
+DECLARE
+    current_stock INTEGER;
+BEGIN
+    -- Obtener stock actual
+    SELECT stock INTO current_stock
+    FROM product
+    WHERE id = p_producto_id;
+
+    -- Validar que el producto existe
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Producto con ID % no encontrado', p_producto_id;
+    END IF;
+
+    -- Validar que hay suficiente stock
+    IF current_stock < p_cantidad THEN
+        RAISE EXCEPTION 'Stock insuficiente. Stock actual: %, solicitado: %', current_stock, p_cantidad;
+    END IF;
+
+    -- Actualizar stock
+    UPDATE product
+    SET stock = stock - p_cantidad
+    WHERE id = p_producto_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Función para obtener productos con bajo stock
+CREATE OR REPLACE FUNCTION productos_bajo_stock(
+    p_minimo INTEGER
+) RETURNS TABLE(
+    id INTEGER,
+    name VARCHAR,
+    stock INTEGER
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT p.id, p.name, p.stock
+    FROM product p
+    WHERE p.stock < p_minimo;
+END;
+$$ LANGUAGE plpgsql;

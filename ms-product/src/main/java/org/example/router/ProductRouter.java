@@ -15,8 +15,8 @@ public class ProductRouter {
                 .GET("/products/{id}", handler::getById)
                 .POST("/products", handler::create)
                 .PUT("/products/{id}", handler::update)
-                .PUT("/products/increasestock/{id}", handler::increaseStock)
-                .PUT("/products/decreasestock/{id}", handler::decreaseStock)
+                .PUT("/products/{id}/stock", handler::actualizarStock)
+                .GET("/products/bajo-stock", handler::obtenerBajoStock)
                 .DELETE("/products/{id}", handler::delete)
                 .build();
     }

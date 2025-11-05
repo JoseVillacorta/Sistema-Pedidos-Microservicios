@@ -2,7 +2,7 @@ spring:
   # 1. Configuración del Microservicio
   application:
     # Este nombre debe coincidir con el nombre del archivo de propiedades en tu config-repo (ej. product-service-dev.yml)
-    name: product-service
+    name: ms-productos
 
   cloud:
     config:

@@ -83,4 +83,21 @@ public class ProductHandler {
         return  service.delete(id)
                 .then(ServerResponse.noContent().build());
     }
+
+    public Mono<ServerResponse> actualizarStock(ServerRequest request) {
+        int id = Integer.parseInt(request.pathVariable("id"));
+        return request.bodyToMono(Map.class)
+                .flatMap(body -> {
+                    int cantidad = (int) body.get("cantidad");
+                    return service.actualizarStock(id, cantidad)
+                            .then(ServerResponse.ok().build());
+                });
+    }
+
+    public Mono<ServerResponse> obtenerBajoStock(ServerRequest request) {
+        int minimo = Integer.parseInt(request.queryParam("minimo").orElse("10"));
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(service.obtenerProductosBajoStock(minimo), Product.class);
+    }
 }

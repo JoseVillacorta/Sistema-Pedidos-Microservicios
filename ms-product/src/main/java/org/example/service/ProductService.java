@@ -62,4 +62,12 @@ public class ProductService {
     public Mono<Void> delete(int id){
         return repository.deleteById(id);
     }
+
+    public Mono<Void> actualizarStock(int id, int cantidad) {
+        return repository.actualizarStock(id, cantidad).then();
+    }
+
+    public Flux<Product> obtenerProductosBajoStock(int minimo) {
+        return repository.obtenerProductosBajoStock(minimo);
+    }
 }

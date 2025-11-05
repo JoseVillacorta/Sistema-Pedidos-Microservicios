@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: serverconfig
+  profiles:
+    active: ${SPRING_PROFILE:dev}
+
+# Configuración común para todos los perfiles
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh,env,beans
+  endpoint:
+    health:
+      show-details: always
+
+# Información de la aplicación
+info:
+  app:
+    name: ${spring.application.name}
+    description: Spring Cloud Config Server
+    version: 0.0.1-SNAPSHOT

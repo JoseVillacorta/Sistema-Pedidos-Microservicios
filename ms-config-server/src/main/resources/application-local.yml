@@ -1,0 +1,41 @@
+server:
+  port: 8888
+
+spring:
+  cloud:
+    config:
+      server:
+        # Repositorio Git local para desarrollo
+        git:
+          uri: file:///${PROPERTIES_DIRECTORY}
+          default-label: main
+          clone-on-start: true
+          timeout: 5
+          search-paths:
+            - '{application}'
+            - '{application}/{profile}'
+
+          # Forzar actualización en cada petición (útil en desarrollo)
+          force-pull: true
+          refresh-rate: 0
+
+      # Permitir sobrescribir configuraciones
+      override-none: true
+
+
+# Logging detallado para debugging
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.config: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+
+# Configuración adicional para desarrollo
+debug: false
+
+# Desactivar cache para ver cambios inmediatamente
+spring.cloud.config.server.git.skip-ssl-validation: true

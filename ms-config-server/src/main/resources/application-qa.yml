@@ -1,0 +1,81 @@
+server:
+  port: 8888
+  # Configuración de timeouts
+  tomcat:
+    connection-timeout: 20000
+    max-threads: 200
+
+
+spring:
+  cloud:
+    config:
+      server:
+        # Repositorio Git remoto para QA
+        git:
+          uri: ${GIT_REPO_URI:https://github.com/tu-organizacion/config-repo.git}
+          default-label: qa
+          clone-on-start: true
+          timeout: 10
+
+          # Credenciales desde variables de entorno
+          username: ${GIT_USERNAME}
+          password: ${GIT_PASSWORD}
+
+          search-paths:
+            - '{application}'
+            - '{application}/{profile}'
+            - 'qa/{application}'
+
+          # Actualización cada 60 segundos
+          refresh-rate: 60
+          force-pull: false
+
+          # Configuración de cache
+          basedir: /tmp/config-repo-qa
+
+      override-none: true
+      fail-fast: true
+
+  # Seguridad configurada
+  security:
+    user:
+      name: ${CONFIG_USERNAME:admin}
+      password: ${CONFIG_PASSWORD:qa456}
+
+# Logging moderado
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.config: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: /var/log/config-server/application-qa.log
+    max-size: 10MB
+    max-history: 30
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,refresh,env
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    refresh:
+      enabled: true
+
+# Health checks
+    server:
+      health:
+        enabled: true
+        repositories:
+          ms-productos:
+            label: qa
+          ms-pedidos:
+            label: qa

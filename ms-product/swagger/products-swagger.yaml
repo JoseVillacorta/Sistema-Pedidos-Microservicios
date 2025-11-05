@@ -1,0 +1,197 @@
+openapi: 3.0.1
+info:
+  title: Product Management API (WebFlux Functional)
+  description: API para la gestión de productos, implementada con Spring WebFlux Functional Endpoints.
+  version: v1.0.0
+servers:
+  - url: http://localhost:8080/
+    description: URL base del servicio
+tags:
+  - name: Products
+    description: Operaciones CRUD para la entidad Producto.
+  - name: Stock Management
+    description: Endpoints para modificar el stock de productos.
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: ID único del producto. (Solo lectura en POST/PUT)
+          example: 101
+        name:
+          type: string
+          description: Nombre del producto.
+          example: Laptop Ultra
+        description:
+          type: string
+          description: Descripción detallada del producto.
+          example: Portátil de alto rendimiento con 32GB de RAM.
+        price:
+          type: number
+          format: float
+          description: Precio del producto.
+          example: 1250.99
+        stock:
+          type: integer
+          format: int32
+          description: Cantidad de unidades disponibles en stock.
+          example: 45
+      required:
+        - name
+        - price
+        - stock
+
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Obtener todos los productos
+      operationId: getAllProducts
+      responses:
+        '200':
+          description: Lista de productos obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      tags:
+        - Products
+      summary: Crear un nuevo producto
+      operationId: createProduct
+      requestBody:
+        description: Producto a crear. El campo 'id' será ignorado o generado por el sistema.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Producto creado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Datos de entrada inválidos (ej. falta nombre o precio)
+
+  /products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Obtener producto por ID
+      operationId: getProductById
+      parameters:
+        - name: id
+          in: path
+          description: ID del producto a buscar
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Producto no encontrado
+    put:
+      tags:
+        - Products
+      summary: Actualizar un producto existente
+      operationId: updateProduct
+      parameters:
+        - name: id
+          in: path
+          description: ID del producto a actualizar
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: Nuevos detalles del producto.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Producto actualizado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Producto no encontrado
+    delete:
+      tags:
+        - Products
+      summary: Eliminar un producto por ID
+      operationId: deleteProduct
+      parameters:
+        - name: id
+          in: path
+          description: ID del producto a eliminar
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '204':
+          description: Producto eliminado con éxito (Sin contenido)
+        '404':
+          description: Producto no encontrado
+
+  /products/increasestock/{id}:
+    put:
+      tags:
+        - Stock Management
+      summary: Incrementar el stock del producto
+      description: Incrementa el stock del producto identificado por ID. (Asume que la lógica en el handler aumenta el stock en una unidad o una cantidad fija).
+      operationId: increaseStock
+      parameters:
+        - name: id
+          in: path
+          description: ID del producto cuyo stock se debe incrementar
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Stock incrementado
+        '404':
+          description: Producto no encontrado
+
+  /products/decreasestock/{id}:
+    put:
+      tags:
+        - Stock Management
+      summary: Decrementar el stock del producto
+      description: Decrementa el stock del producto identificado por ID. (Asume que la lógica en el handler reduce el stock en una unidad o una cantidad fija).
+      operationId: decreaseStock
+      parameters:
+        - name: id
+          in: path
+          description: ID del producto cuyo stock se debe decrementar
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Stock decrementado
+        '404':
+          description: Producto no encontrado

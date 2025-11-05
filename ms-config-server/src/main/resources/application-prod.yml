@@ -1,0 +1,118 @@
+server:
+  port: 8888
+  # Configuración optimizada para producción
+  tomcat:
+    connection-timeout: 30000
+    threads:
+      max: 300
+      min-spare: 10
+    max-connections: 10000
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+  # SSL/TLS (descomentar si se usa HTTPS)
+  # ssl:
+  #   enabled: true
+  #   key-store: ${KEYSTORE_PATH:/etc/ssl/config-server.p12}
+  #   key-store-password: ${KEYSTORE_PASSWORD}
+  #   key-store-type: PKCS12
+  #   key-alias: config-server
+
+spring:
+  cloud:
+    config:
+      server:
+        # Repositorio Git remoto para producción
+        git:
+          uri: ${GIT_REPO_URI:https://github.com/tu-organizacion/config-repo-prod.git}
+          default-label: main
+          clone-on-start: true
+          timeout: 15
+
+          # Credenciales desde variables de entorno (OBLIGATORIO)
+          username: ${GIT_USERNAME}
+          password: ${GIT_PASSWORD}
+
+          search-paths:
+            - '{application}'
+            - '{application}/{profile}'
+            - 'production/{application}'
+
+          # Actualización cada 5 minutos en producción
+          refresh-rate: 300
+          force-pull: true
+
+          # Directorio persistente para cache
+          basedir: /opt/config-server/repo
+
+          # Validación SSL habilitada
+          skip-ssl-validation: false
+
+          # Configuración de reintentos
+          try-master-branch: true
+
+        # Health check para repositorios
+        health:
+          enabled: true
+          repositories:
+            ms-productos:
+              label: main
+              name: ms-productos
+            ms-pedidos:
+              label: main
+              name: ms-pedidos
+
+        # Encriptación de propiedades sensibles
+        encrypt:
+          enabled: true
+
+      # Configuración de comportamiento
+      override-none: false
+      fail-fast: true
+
+      # Configuración de reintentos
+      retry:
+        max-attempts: 6
+        initial-interval: 1000
+        multiplier: 1.5
+        max-interval: 10000
+
+  # Seguridad estricta
+  security:
+    user:
+      name: ${CONFIG_USERNAME}
+      password: ${CONFIG_PASSWORD}
+
+# Logging para producción (solo errores y warnings)
+logging:
+  level:
+    root: WARN
+    org.springframework.cloud.config: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: /var/log/config-server/application.log
+    max-size: 50MB
+    max-history: 90
+    total-size-cap: 1GB
+
+# Actuator restringido
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true

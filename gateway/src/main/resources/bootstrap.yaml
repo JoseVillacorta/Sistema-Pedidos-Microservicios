@@ -1,0 +1,16 @@
+spring:
+  # 1. Configuración del Microservicio
+  application:
+    # Este nombre debe coincidir con el nombre del archivo de propiedades en tu config-repo (ej. product-service-dev.yml)
+    name: gateway-service
+
+  cloud:
+    config:
+      # URL donde se está ejecutando tu Config Server
+      uri: http://localhost:8888
+
+      # Perfil que deseas cargar (ej. dev, prod, local)
+      profile: dev
+
+      # Etiqueta (branch) del repositorio Git a usar (usa el que definiste en el Server Config)
+      label: main # Puede ser 'main', 'master' o la rama que uses
